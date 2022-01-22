@@ -12,6 +12,8 @@ def load_data(path: Path) -> dict[str, pd.DataFrame]:
 
     data_path = path / FILE_NAME
 
+    print(f"Loading data from {data_path!s}")
+
     return pd.read_excel(data_path, sheet_name=None, header=None)
 
 
@@ -64,33 +66,44 @@ def prepare_data(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFr
 
     for sheet_name in data:
         if sheet_name not in DATA_SHEETS:
+            print(f"Processing data in {sheet_name=}")
             try:
                 project_df, receipt_df, payment_df = process_data(sheet_name, data[sheet_name])
 
-                project_df = pd.concat(project_dfs)
-                receipt_df = pd.concat(receipt_dfs)
-                payment_df = pd.concat(payment_dfs)
-            except:
-                print(f"Check sheet structure of {sheet_name=}")
+                project_dfs.append(project_df)
+                receipt_dfs.append(receipt_df)
+                payment_dfs.append(payment_df)
+            except Exception as exc:
+                print(f"|-- Check sheet structure of {sheet_name=}")
+                print(f"{exc!s}")
+                continue
 
-            project_dfs.append(project_df)
-            receipt_dfs.append(receipt_df)
-            payment_dfs.append(payment_df)
+    project_df = pd.concat(project_dfs)
+    receipt_df = pd.concat(receipt_dfs)
+    payment_df = pd.concat(payment_dfs)
 
     return project_df, receipt_df, payment_df
 
 
 def main():
     path = Path(__file__).parent / "Data"
+
+    print("Loading data")
     df_map = load_data(path)
+
+    print("Preparing data")
     project_df, receipt_df, payment_df = prepare_data(df_map)
 
     project_path = path / "summary.csv"
     receipt_path = path / "receipt.csv"
     payment_path = path / "payment.csv"
 
+    print("Writing data")
+    print("|-- Project summary")
     project_df.to_csv(project_path, index=False)
+    print("|-- Receipts")
     receipt_df.to_csv(receipt_path, index=False)
+    print("|-- Payments")
     payment_df.to_csv(payment_path, index=False)
 
 
