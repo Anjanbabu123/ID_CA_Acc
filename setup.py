@@ -11,10 +11,9 @@ setuptools.setup(
     author_email='anjan@anjanandco.com',
     python_requires='>=3.9.0',
     url='https://github.com/Anjanbabu123/ID_CA_Acc',
-    package_dir={'': 'src'},
-    packages=setuptools.find_packages(where='src'),
+    py_modules=['solver'],
     entry_points={
-        'console_scripts': ["pmake=idca.__main__:pmake"],
+        'console_scripts': ["run=idca.script:main"],
     },
     install_requires=["pandas",
                       "numpy",
@@ -22,7 +21,7 @@ setuptools.setup(
                       "openpyxl"],
     extras_require={},
     include_package_data=True,
-    license='',
+    license='proprietary',
     classifiers=[
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
