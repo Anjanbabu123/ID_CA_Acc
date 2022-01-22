@@ -30,5 +30,5 @@ In the project folder open powershell
 
 ```shell
 .venv/Scripts/activate     #  this activates the virtual environment
-pmake run                  #  this executes the program on the data provided
+run                        #  this executes the program on the data provided
 ```
