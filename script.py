@@ -1,6 +1,10 @@
 from pathlib import Path
+import warnings
 
 import pandas as pd
+
+
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 
 def load_data(path: Path) -> dict[str, pd.DataFrame]:
@@ -33,7 +37,7 @@ def process_data(sheet_name: str, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Da
         if separation_index is None and pd.isnull(header):
             separation_index = idx
             continue
-        
+
         if terminal_index is None and pd.isnull(header):
             terminal_index = idx
             break
@@ -60,14 +64,18 @@ def prepare_data(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFr
 
     for sheet_name in data:
         if sheet_name not in DATA_SHEETS:
-            project_df, receipt_df, payment_df = process_data(sheet_name, data[sheet_name])
+            try:
+                project_df, receipt_df, payment_df = process_data(sheet_name, data[sheet_name])
+
+                project_df = pd.concat(project_dfs)
+                receipt_df = pd.concat(receipt_dfs)
+                payment_df = pd.concat(payment_dfs)
+            except:
+                print(f"Check sheet structure of {sheet_name=}")
+
             project_dfs.append(project_df)
             receipt_dfs.append(receipt_df)
             payment_dfs.append(payment_df)
-
-    project_df = pd.concat(project_dfs)
-    receipt_df = pd.concat(receipt_dfs)
-    payment_df = pd.concat(payment_dfs)
 
     return project_df, receipt_df, payment_df
 
