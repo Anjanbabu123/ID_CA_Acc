@@ -66,17 +66,13 @@ def prepare_data(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFr
 
     for sheet_name in data:
         if sheet_name not in DATA_SHEETS:
-            print(f"Processing data in {sheet_name=}")
             try:
                 project_df, receipt_df, payment_df = process_data(sheet_name, data[sheet_name])
-
                 project_dfs.append(project_df)
                 receipt_dfs.append(receipt_df)
                 payment_dfs.append(payment_df)
-            except Exception as exc:
-                print(f"|-- Check sheet structure of {sheet_name=}")
-                print(f"{exc!s}")
-                continue
+            except:
+                print(f"{sheet_name=} CHECK SHEET STRUCTURE")
 
     project_df = pd.concat(project_dfs)
     receipt_df = pd.concat(receipt_dfs)
