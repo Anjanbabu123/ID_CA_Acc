@@ -23,14 +23,33 @@ def truncate_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def process_data(sheet_name: str, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    start_index = None
     terminal_index = None
-    for idx, header in enumerate(df.iloc[1].values[1:]):
+    start_index2 = None
+    terminal_index2 = None
+
+    for idx, header in enumerate(df.iloc[1].values):
+        if start_index is None and not pd.isnull(header):
+            start_index = idx
+            continue
         if terminal_index is None and pd.isnull(header):
             terminal_index = idx
             continue
+        if terminal_index is not None and start_index2 is None and not pd.isnull(header):
+            start_index2 = idx
+            continue
+        if terminal_index is not None and start_index2 is not None and terminal_index2 is None and pd.isnull(header):
+            terminal_index2 = idx
+            continue
 
-    project_df = df.iloc[2:3, 1:terminal_index].reset_index(drop=True)
-    project_df.columns = df.iloc[1, 1:terminal_index]
+    project_df_1 = df.iloc[2:3, start_index:terminal_index].reset_index(drop=True)
+    project_df_1.columns = df.iloc[1, start_index:terminal_index]
+
+    project_df_2 = df.iloc[2:3, start_index2:terminal_index2].reset_index(drop=True)
+    project_df_2.columns = df.iloc[1, start_index2:terminal_index2]
+
+    project_df = pd.concat([project_df_1, project_df_2], axis=1)
+
     project_df["Sheet Name"] = sheet_name
 
     separation_index = None
@@ -58,7 +77,8 @@ def process_data(sheet_name: str, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Da
 
 
 def prepare_data(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    DATA_SHEETS = ["DATA", "GST Computer", "GST", "Summary", "GST Comp", "Design service"]
+    DATA_SHEETS = ["DATA", "GST Computer", "GST", "Summary", "GST Comp", "Design service",
+                   "Project List", "Sheet46", "P&L Summary", "HO Summary", "Design service"]
 
     project_dfs = []
     receipt_dfs = []
@@ -71,7 +91,8 @@ def prepare_data(data: dict[str, pd.DataFrame]) -> tuple[pd.DataFrame, pd.DataFr
                 project_dfs.append(project_df)
                 receipt_dfs.append(receipt_df)
                 payment_dfs.append(payment_df)
-            except:
+            except Exception as exc:
+                print(exc)
                 print(f"{sheet_name=} CHECK SHEET STRUCTURE")
 
     project_df = pd.concat(project_dfs)
